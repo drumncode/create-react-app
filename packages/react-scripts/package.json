@@ -1,8 +1,8 @@
 {
-  "name": "react-scripts",
+  "name": "drumncode-react-scripts",
   "version": "2.1.8",
-  "description": "Configuration and scripts for Create React App.",
-  "repository": "facebook/create-react-app",
+  "description": "Drum'N'Code Configuration and scripts for Create React App.",
+  "repository": "drumncode/create-react-app",
   "license": "MIT",
   "engines": {
     "node": ">=8.10"
