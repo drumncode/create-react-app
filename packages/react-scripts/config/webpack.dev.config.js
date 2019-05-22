@@ -49,7 +49,7 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function(shouldBuild) {
+module.exports = async function(shouldBuild) {
 
   // Webpack uses `publicPath` to determine where the app is being served from.
   // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -64,7 +64,7 @@ module.exports = function(shouldBuild) {
   // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
   const publicUrl = publicPath.slice(0, -1);
   // Get environment variables to inject into our app.
-  const env = getClientEnvironment(publicUrl);
+  const env = await getClientEnvironment(publicUrl);
 
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {

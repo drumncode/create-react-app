@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const paths = require('./paths');
+const https = require('https');
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')];
@@ -68,7 +69,20 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 // injected into the application via DefinePlugin in Webpack configuration.
 const REACT_APP = /^REACT_APP_/i;
 
-function getClientEnvironment(publicUrl) {
+async function getClientEnvironment(publicUrl) {
+  if (process.env.REACT_APP_appConfigUrl) {
+    try {
+      const {
+        api: apiUrl,
+        echo: echoUrl
+      } = await getConfig(process.env.REACT_APP_appConfigUrl);
+      process.env.REACT_APP_serverUrl = apiUrl;
+      process.env.REACT_APP_socketIoUrl = echoUrl;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   const raw = Object.keys(process.env)
     .filter(key => REACT_APP.test(key))
     .reduce(
@@ -96,6 +110,23 @@ function getClientEnvironment(publicUrl) {
   };
 
   return { raw, stringified };
+}
+
+function getConfig(configUrl) {
+  return new Promise((resolve, reject) => {
+    https.get(configUrl, response => {
+      let data = '';
+      response.on('data', chunk => data += chunk);
+      response.on('end', () => {
+        const parsedData = JSON.parse(data);
+        resolve(configResponseTransformer(parsedData));
+      });
+    }).on('error', err => reject(err));
+  });
+}
+
+function configResponseTransformer({ endpoints: { api, echo }}) {
+  return { api, echo };
 }
 
 module.exports = getClientEnvironment;
