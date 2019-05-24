@@ -78,7 +78,8 @@ async function getClientEnvironment(publicUrl, { isEnvReplace }) {
       process.env.REACT_APP_serverUrl = apiUrl;
       process.env.REACT_APP_socketIoUrl = echoUrl;
     } catch (e) {
-      // TODO: Handle error with retrieving static config
+      console.error('Config file has been not received', e);
+      process.exit(1);
     }
   }
 
