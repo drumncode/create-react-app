@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const paths = require('./paths');
 const https = require('https');
+const chalk = require('react-dev-utils/chalk');
 
 // Make sure that including paths.js after env.js will read .env variables.
 delete require.cache[require.resolve('./paths')];
@@ -77,8 +78,9 @@ async function getClientEnvironment(publicUrl, { isEnvReplace }) {
       );
       process.env.REACT_APP_serverUrl = apiUrl;
       process.env.REACT_APP_socketIoUrl = echoUrl;
-    } catch (e) {
-      console.error('Config file has been not received', e);
+    } catch (error) {
+      console.error(chalk.red('Config file has been not received'));
+      console.error(error && error.message);
       process.exit(1);
     }
   }
