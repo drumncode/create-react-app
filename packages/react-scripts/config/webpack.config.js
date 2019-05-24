@@ -54,7 +54,7 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function(webpackEnv) {
+module.exports = async function(webpackEnv) {
   const isEnvDevelopment = webpackEnv === 'development';
   const isEnvProduction = webpackEnv === 'production';
 
@@ -75,7 +75,7 @@ module.exports = function(webpackEnv) {
     ? publicPath.slice(0, -1)
     : isEnvDevelopment && '';
   // Get environment variables to inject into our app.
-  const env = getClientEnvironment(publicUrl);
+  const env = await getClientEnvironment(publicUrl, { isEnvReplace: false });
 
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {

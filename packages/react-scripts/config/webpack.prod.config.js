@@ -46,8 +46,7 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function () {
-
+module.exports = async function() {
   // Webpack uses `publicPath` to determine where the app is being served from.
   // It requires a trailing slash, or the file assets will get an incorrect path.
   // In development, we always serve from the root. This makes config easier.
@@ -61,7 +60,7 @@ module.exports = function () {
   // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
   const publicUrl = publicPath.slice(0, -1);
   // Get environment variables to inject into our app.
-  const env = getClientEnvironment(publicUrl);
+  const env = await getClientEnvironment(publicUrl, { isEnvReplace: true });
 
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {
@@ -195,13 +194,13 @@ module.exports = function () {
             parser: safePostCssParser,
             map: shouldUseSourceMap
               ? {
-                // `inline: false` forces the sourcemap to be output into a
-                // separate file
-                inline: false,
-                // `annotation: true` appends the sourceMappingURL to the end of
-                // the css file, helping the browser find the sourcemap
-                annotation: true,
-              }
+                  // `inline: false` forces the sourcemap to be output into a
+                  // separate file
+                  inline: false,
+                  // `annotation: true` appends the sourceMappingURL to the end of
+                  // the css file, helping the browser find the sourcemap
+                  annotation: true,
+                }
               : false,
           },
         }),
@@ -224,8 +223,7 @@ module.exports = function () {
       // https://github.com/facebook/create-react-app/issues/253
       modules: ['node_modules'].concat(
         // It is guaranteed to exist because we tweak it in `env.js`
-        process.env.NODE_PATH.split(path.delimiter)
-          .filter(Boolean)
+        process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
       ),
       // These are the reasonable defaults supported by the Node ecosystem.
       // We also include JSX as a common component filename extension to support
@@ -301,15 +299,12 @@ module.exports = function () {
                 // We remove this when the user ejects because the default
                 // is sane and uses Babel options. Instead of options, we use
                 // the react-scripts and babel-preset-react-app versions.
-                cacheIdentifier: getCacheIdentifier(
-                  'production',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                    'react-dev-utils',
-                    'react-scripts',
-                  ]
-                ),
+                cacheIdentifier: getCacheIdentifier('production', [
+                  'babel-plugin-named-asset-import',
+                  'babel-preset-react-app',
+                  'react-dev-utils',
+                  'react-scripts',
+                ]),
                 // @remove-on-eject-end
                 plugins: [
                   [
@@ -350,15 +345,12 @@ module.exports = function () {
                 cacheDirectory: true,
                 cacheCompression: true,
                 // @remove-on-eject-begin
-                cacheIdentifier: getCacheIdentifier(
-                  'production',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                    'react-dev-utils',
-                    'react-scripts',
-                  ]
-                ),
+                cacheIdentifier: getCacheIdentifier('production', [
+                  'babel-plugin-named-asset-import',
+                  'babel-preset-react-app',
+                  'react-dev-utils',
+                  'react-scripts',
+                ]),
                 // @remove-on-eject-end
                 // If an error happens in a package, it's possible to be
                 // because it was compiled. Thus, we don't want the browser
@@ -518,27 +510,27 @@ module.exports = function () {
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       // TypeScript type checking
       useTypeScript &&
-      new ForkTsCheckerWebpackPlugin({
-        typescript: resolve.sync('typescript', {
-          basedir: paths.appNodeModules,
+        new ForkTsCheckerWebpackPlugin({
+          typescript: resolve.sync('typescript', {
+            basedir: paths.appNodeModules,
+          }),
+          async: false,
+          useTypescriptIncrementalApi: true,
+          checkSyntacticErrors: true,
+          tsconfig: paths.appTsConfig,
+          reportFiles: [
+            '**',
+            '!**/*.json',
+            '!**/__tests__/**',
+            '!**/?(*.)(spec|test).*',
+            '!**/src/setupProxy.*',
+            '!**/src/setupTests.*',
+          ],
+          watch: paths.appSrc,
+          silent: true,
+          // The formatter is invoked directly in WebpackDevServerUtils during development
+          formatter: typescriptFormatter,
         }),
-        async: false,
-        useTypescriptIncrementalApi: true,
-        checkSyntacticErrors: true,
-        tsconfig: paths.appTsConfig,
-        reportFiles: [
-          '**',
-          '!**/*.json',
-          '!**/__tests__/**',
-          '!**/?(*.)(spec|test).*',
-          '!**/src/setupProxy.*',
-          '!**/src/setupTests.*',
-        ],
-        watch: paths.appSrc,
-        silent: true,
-        // The formatter is invoked directly in WebpackDevServerUtils during development
-        formatter: typescriptFormatter,
-      }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.

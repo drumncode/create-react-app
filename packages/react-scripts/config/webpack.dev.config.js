@@ -49,8 +49,7 @@ const sassModuleRegex = /\.module\.(scss|sass)$/;
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
-module.exports = function(shouldBuild) {
-
+module.exports = async function(shouldBuild) {
   // Webpack uses `publicPath` to determine where the app is being served from.
   // It requires a trailing slash, or the file assets will get an incorrect path.
   // In development, we always serve from the root. This makes config easier.
@@ -64,7 +63,7 @@ module.exports = function(shouldBuild) {
   // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
   const publicUrl = publicPath.slice(0, -1);
   // Get environment variables to inject into our app.
-  const env = getClientEnvironment(publicUrl);
+  const env = await getClientEnvironment(publicUrl, { isEnvReplace: true });
 
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {
@@ -141,8 +140,8 @@ module.exports = function(shouldBuild) {
       // We use "/" in development.
       publicPath: publicPath,
       // Point sourcemap entries to original disk location (format as URL on Windows)
-      devtoolModuleFilenameTemplate:
-        (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
+      devtoolModuleFilenameTemplate: info =>
+        path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     },
     optimization: {
       minimize: false,
@@ -300,15 +299,12 @@ module.exports = function(shouldBuild) {
                 // We remove this when the user ejects because the default
                 // is sane and uses Babel options. Instead of options, we use
                 // the react-scripts and babel-preset-react-app versions.
-                cacheIdentifier: getCacheIdentifier(
-                  'development',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                    'react-dev-utils',
-                    'react-scripts',
-                  ]
-                ),
+                cacheIdentifier: getCacheIdentifier('development', [
+                  'babel-plugin-named-asset-import',
+                  'babel-preset-react-app',
+                  'react-dev-utils',
+                  'react-scripts',
+                ]),
                 // @remove-on-eject-end
                 plugins: [
                   [
@@ -349,15 +345,12 @@ module.exports = function(shouldBuild) {
                 cacheDirectory: true,
                 cacheCompression: false,
                 // @remove-on-eject-begin
-                cacheIdentifier: getCacheIdentifier(
-                   'development',
-                  [
-                    'babel-plugin-named-asset-import',
-                    'babel-preset-react-app',
-                    'react-dev-utils',
-                    'react-scripts',
-                  ]
-                ),
+                cacheIdentifier: getCacheIdentifier('development', [
+                  'babel-plugin-named-asset-import',
+                  'babel-preset-react-app',
+                  'react-dev-utils',
+                  'react-scripts',
+                ]),
                 // @remove-on-eject-end
                 // If an error happens in a package, it's possible to be
                 // because it was compiled. Thus, we don't want the browser
@@ -460,12 +453,12 @@ module.exports = function(shouldBuild) {
           {
             inject: true,
             template: paths.appHtml,
-          },
+          }
         )
       ),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
-        new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
+      new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
       // Makes some environment variables available in index.html.
       // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
       // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -486,12 +479,12 @@ module.exports = function(shouldBuild) {
       // to restart the development server for Webpack to discover it. This plugin
       // makes the discovery automatic so you don't have to restart.
       // See https://github.com/facebook/create-react-app/issues/186
-        new MiniCssExtractPlugin({
-          // Options similar to the same options in webpackOptions.output
-          // both options are optional
-          filename: 'static/css/[name].[contenthash:8].css',
-          chunkFilename: 'static/css/[name].[contenthash:8].chunk.css',
-        }),
+      new MiniCssExtractPlugin({
+        // Options similar to the same options in webpackOptions.output
+        // both options are optional
+        filename: 'static/css/[name].[contenthash:8].css',
+        chunkFilename: 'static/css/[name].[contenthash:8].chunk.css',
+      }),
       // Generate a manifest file which contains a mapping of all asset filenames
       // to their corresponding output file so that tools can pick it up without
       // having to parse `index.html`.
