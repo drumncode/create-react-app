@@ -60,7 +60,12 @@ if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
 }
 
 // Generate configuration
-const config = configFactory('production');
+let config = configFactory('production');
+
+if (fs.existsSync(paths.appPath + '/webpack.config.prod.js')) {
+  const appConfig = require(paths.appPath + '/webpack.config.prod.js');
+  config = appConfig(config);
+}
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.

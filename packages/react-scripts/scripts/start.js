@@ -91,7 +91,13 @@ checkBrowsers(paths.appPath, isInteractive)
       // We have not found a port.
       return;
     }
-    const config = configFactory('development');
+    let config = configFactory('development');
+
+    if (fs.existsSync(paths.appPath + '/webpack.config.dev.js')) {
+      const appConfig = require(paths.appPath + '/webpack.config.dev.js');
+      config = appConfig(config);
+    }
+
     const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
     const appName = require(paths.appPackageJson).name;
     const useTypeScript = fs.existsSync(paths.appTsConfig);
