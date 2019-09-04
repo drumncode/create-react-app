@@ -91,7 +91,7 @@ checkBrowsers(paths.appPath, isInteractive)
       // We have not found a port.
       return;
     }
-    let config = configFactory('development');
+    let config = configFactory('development', 'start');
 
     if (fs.existsSync(paths.appPath + '/webpack.config.dev.js')) {
       const appConfig = require(paths.appPath + '/webpack.config.dev.js');

@@ -8,9 +8,12 @@
 // @remove-on-eject-end
 'use strict';
 
+const isDev = process.argv.includes('dev');
+const mode = isDev ? 'development' : 'production';
+
 // Do this as the first thing so that any code reading it knows the right env.
-process.env.BABEL_ENV = 'production';
-process.env.NODE_ENV = 'production';
+process.env.BABEL_ENV = mode;
+process.env.NODE_ENV = mode;
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -60,10 +63,13 @@ if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
 }
 
 // Generate configuration
-let config = configFactory('production');
+let config = configFactory(mode, 'build');
 
-if (fs.existsSync(paths.appPath + '/webpack.config.prod.js')) {
-  const appConfig = require(paths.appPath + '/webpack.config.prod.js');
+const configExtension = isDev ? 'dev' : 'prod';
+const pathToModifiedConfig = paths.appPath + `/webpack.config.${configExtension}.js`;
+
+if (fs.existsSync(pathToModifiedConfig)) {
+  const appConfig = require(pathToModifiedConfig);
   config = appConfig(config);
 }
 
@@ -153,7 +159,7 @@ function build(previousFileSizes) {
     console.log();
   }
 
-  console.log('Creating an optimized production build...');
+  console.log(`Creating an optimized ${mode} build...`);
 
   const compiler = webpack(config);
   return new Promise((resolve, reject) => {
