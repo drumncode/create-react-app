@@ -86,7 +86,7 @@ checkBrowsers(paths.appPath, isInteractive)
     // run on a different port. `choosePort()` Promise resolves to the next free port.
     return choosePort(HOST, DEFAULT_PORT);
   })
-  .then(port => {
+  .then(async (port) => {
     if (port == null) {
       // We have not found a port.
       return;
@@ -95,7 +95,7 @@ checkBrowsers(paths.appPath, isInteractive)
 
     if (fs.existsSync(paths.appPath + '/webpack.config.dev.js')) {
       const appConfig = require(paths.appPath + '/webpack.config.dev.js');
-      config = appConfig(config);
+      config = await appConfig(config);
     }
 
     const protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
